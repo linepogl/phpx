@@ -1,0 +1,18 @@
+
+partial module A {
+	public module A {
+		partial class A {
+			public class A {
+			}
+		}
+	}
+}
+public module A {
+	partial module A {
+		public class A {
+			partial class A {
+			}
+		}
+	}
+}
+
