@@ -1,7 +1,6 @@
 <?php
-namespace Phpx;
 
-class Source {
+class SourcePos {
 	private $filename = null;
 	private $line = 0;
 	private $col = 0;
@@ -14,5 +13,6 @@ class Source {
 	public function GetLine(){ return $this->line; }
 	public function GetCol(){ return $this->col; }
 
+	public function __toString(){ return $this->ToDebugString(); }
 	public function ToDebugString(){ return '@'.$this->filename.'['.$this->line.':'.$this->col.']'; }
 }

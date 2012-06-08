@@ -1,18 +1,14 @@
 
-partial module A {
-	public module A {
-		partial class A {
-			public class A {
-			}
-		}
-	}
-}
-public module A {
-	partial module A {
-		public class A {
-			partial class A {
-			}
-		}
-	}
-}
-
+var x int;
+{x = 3;var z phantom;}
+var y /* inner /* ! */ comment */ a;
+var fw = 0xA4;
+var a a;
+var z int = x; // line comment /* !
+	z = x = a = 8;
+	y = a;
+var q A.B.C ;
+var qq = q = q;
+x;
+fw;
+4;

@@ -1,49 +1,45 @@
 <?php
 
-require('src/Source.php');
-require('src/Token.php');
-require('src/Validator.php');
-require('src/QName.php');
+foreach (scandir('src') as $f) {
+	if ($f == '.' || $f == '..') continue;
+	if (is_dir("src/$f")) {
+		foreach (scandir("src/$f") as $ff) {
+			if (is_dir("src/$f/$ff")) continue;
+			require("src/$f/$ff");
+		}
+	}
+	else {
+		require("src/$f");
+	}
+}
 
-require('src/Reader.php');
-require('src/Lexer.php');
-require('src/Compiler.php');
-require('src/Writer.php');
-
-require 'ref/_.php';
-require 'ref/PhpxAssembly.php';
-require 'ref/PhpxModule.php';
-require 'ref/PhpxClass.php';
-
-require 'exp/_Expression.php';
-require 'exp/CommentExpression.php';
-require 'exp/QNameExpression.php';
-require 'exp/AssemblyBodyExpression.php';
-require 'exp/ModuleDeclarationExpression.php';
-require 'exp/ModulePartExpression.php';
-require 'exp/ModuleBodyExpression.php';
-require 'exp/ClassDeclarationExpression.php';
-require 'exp/ClassPartExpression.php';
-require 'exp/ClassBodyExpression.php';
 
 
 echo '<pre>';
 
-$compiler = new Phpx\Compiler();
-$compile->Name = 'Test';
+
+$grammar = new PhpxGrammar();
+$grammar->DebugReport();
+die;
+
+$parser = new Parser($grammar);
+
 foreach (scandir('tst') as $f) {
-	if (!is_file("tst/$f")) continue;
-	$compiler->AddFilename("tst/$f");
+	$ff = "tst/$f";
+	if (!is_file($ff)) continue;
+	$reader = new Reader($ff);
+	$lexer = new Lexer($reader);
+	$parser->Add($lexer);
 }
 
-$compiler->Compile();
+$parse_tree = $parser->Parse();
+$parse_tree->DebugReport();
 
-echo '<hr/>';
-$compiler->Validator->RenderText();
+$v = new Validator();
+$ast = AstProgram::Make($parse_tree);
+$ast->CalculateType(new Scope(),$v);
 
-echo '<hr/>';
-$w = new Phpx\Writer('obj/tst.php');
-$compiler->Assembly->Export($w);
-echo file_get_contents('obj/tst.php');
+$ast->DebugReport();
 
-?>
+$v->RenderText();
+

@@ -1,16 +1,3 @@
 
-public module B {
 
-}
-public module B.B {
-	public class B {
-
-	}
-}
-public class B.B.B.B {
-
-}
-
-public function A.Whatever {
-
-}
+4;
