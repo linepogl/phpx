@@ -10,9 +10,6 @@ const TCurlyClose = 'TCurlyClose';
 const TSemicolon = 'TSemicolon';
 
 
-const NProgram = 'NProgram';
-const NProgramFileSequence = 'NProgramFileSequence';
-const NProgramFile = 'NProgramFile';
 const NStatementSequence = 'NStatementSequence';
 const NStatement = 'NStatement';
 const NGroupStatement = 'NGroupStatement';
@@ -38,10 +35,6 @@ class PhpxGrammar extends Grammar {
 		$this[TCurlyClose] = '}';
 		$this[TSemicolon] = ';';
 
-		$this[NProgram] = array(NProgramFileSequence);
-		
-		$this[NProgramFileSequence] = array();
-		$this[NProgramFileSequence] = array( NProgramFile , NProgramFileSequence );
 
 		$this[NProgramFile] = array( NStatementSequence , TEndOfFile );
 

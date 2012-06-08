@@ -8,6 +8,9 @@ const TIdentifier = 'TIdentifier';
 const TIntLiteral = 'TIntLiteral';
 const TComment = 'TComment';
 
+const NProgram = 'NProgram';
+const NProgramFileSequence = 'NProgramFileSequence';
+const NProgramFile = 'NProgramFile';
 
 
 abstract class Grammar implements IteratorAggregate,ArrayAccess {
@@ -44,6 +47,9 @@ abstract class Grammar implements IteratorAggregate,ArrayAccess {
 		$this[TIdentifier] = Terminal::SPECIAL;
 		$this[TIntLiteral] = Terminal::SPECIAL;
 		$this[TComment] = Terminal::SPECIAL;
+		$this[NProgram] = array(NProgramFileSequence);
+		$this[NProgramFileSequence] = array();
+		$this[NProgramFileSequence] = array( NProgramFile , NProgramFileSequence );
 		$this->Init();
 	}
 
@@ -104,9 +110,16 @@ abstract class Grammar implements IteratorAggregate,ArrayAccess {
 		$this->InitGoesToEpsilon();
 		$this->InitFirstSets();
 		$this->InitFollowSets();
-		$this->InitLL1ParsingTable();
+		$this->InitLL1Parsing();
+		$this->InitLR1Parsing();
 	}
-
+	private function DebugProductions(){
+		echo "PRODUCTIONS\n-----------\n";
+		foreach ($this->non_terminals as $non_terminal_key => $non_terminal)
+			foreach ($non_terminal as $rule_key => $rule)
+				echo $non_terminal_key.' -> '.$rule_key . "\n";
+		echo "\n";
+	}
 
 	/** @var array */
 	private $fixed_lexeme_map = array();
@@ -139,6 +152,7 @@ abstract class Grammar implements IteratorAggregate,ArrayAccess {
 
 
 
+
 	private $goes_to_epsilon = array();
 	private function InitGoesToEpsilon(){
 		foreach ($this->symbols as $symbol )
@@ -167,6 +181,8 @@ abstract class Grammar implements IteratorAggregate,ArrayAccess {
 		}
 		return $this->goes_to_epsilon[$symbol->GetKey()];
 	}
+
+
 
 
 
@@ -211,6 +227,20 @@ abstract class Grammar implements IteratorAggregate,ArrayAccess {
 			}
 		}
 		if ($again>0) $this->ReduceFirstSets();
+	}
+	public function DebugFirstSets(){
+		echo "FIRST SETS\n----------\n";
+		foreach ($this->symbols as $symbol_key => $symbol) {
+			echo $symbol_key.' : { ';
+			if ($this->goes_to_epsilon[$symbol_key]) {
+				echo '&epsilon;';
+				if (count($this->first_sets[$symbol_key]) > 0)
+					echo ' , ';
+			}
+			echo implode(' , ',array_keys($this->first_sets[$symbol_key]));
+			echo " }\n";
+		}
+		echo "\n";
 	}
 
 
@@ -270,13 +300,21 @@ abstract class Grammar implements IteratorAggregate,ArrayAccess {
 		}
 		if ($again > 0) $this->ReduceFollowSets();
 	}
+	public function DebugFollowSets(){
+		echo "FOLLOW SETS\n-----------\n";
+		foreach ($this->symbols as $symbol_key => $symbol) {
+			if ($this instanceof Rule) continue;
+			echo $symbol_key.' : { '.implode(' , ',array_keys($this->follow_sets[$symbol_key]))." }\n";
+		}
+		echo "\n";
+	}
 
 
 
 
 
 	private $ll1_parsing_table = array();
-	private function InitLL1ParsingTable(){
+	private function InitLL1Parsing(){
 		foreach ($this->non_terminals as $non_terminal_key => $non_terminal){
 			$this->ll1_parsing_table[$non_terminal_key] = array();
 			foreach ($non_terminal as $rule_key => $rule){
@@ -293,47 +331,7 @@ abstract class Grammar implements IteratorAggregate,ArrayAccess {
 			}
 		}
 	}
-
-
-
-
-
-	public function DebugReport(){
-		/** @var $terminal Terminal */
-		/** @var $non_terminal NonTerminal */
-		/** @var $symbol Symbol */
-		/** @var $rule Rule */
-
-		echo "PRODUCTIONS\n-----------\n";
-		foreach ($this->non_terminals as $non_terminal_key => $non_terminal)
-			foreach ($non_terminal as $rule_key => $rule)
-				echo $non_terminal_key.' -> '.$rule_key . "\n";
-		echo "\n";
-
-
-		echo "FIRST SETS\n----------\n";
-		foreach ($this->symbols as $symbol_key => $symbol) {
-			echo $symbol_key.' : { ';
-			if ($this->goes_to_epsilon[$symbol_key]) {
-				echo '&epsilon;';
-				if (count($this->first_sets[$symbol_key]) > 0)
-					echo ' , ';
-			}
-			echo implode(' , ',array_keys($this->first_sets[$symbol_key]));
-			echo " }\n";
-		}
-		echo "\n";
-
-
-
-		echo "FOLLOW SETS\n-----------\n";
-		foreach ($this->symbols as $symbol_key => $symbol) {
-//			if ($this instanceof Rule) continue;
-			echo $symbol_key.' : { '.implode(' , ',array_keys($this->follow_sets[$symbol_key]))." }\n";
-		}
-		echo "\n";
-
-
+	public function DebugLL1ParsingTable(){
 		echo "LL(1) PARSING TABLE\n-------------------\n";
 		foreach ($this->ll1_parsing_table as $non_terminal => $table){
 			echo $non_terminal . ":\n";
@@ -343,11 +341,6 @@ abstract class Grammar implements IteratorAggregate,ArrayAccess {
 		}
 		echo "\n";
 	}
-
-
-
-
-
 	public function GetNextRuleKey( $non_terminal , $terminal ){
 		if (isset($this->ll1_parsing_table[$non_terminal][$terminal]))
 			return $this->ll1_parsing_table[$non_terminal][$terminal][0];
@@ -355,5 +348,31 @@ abstract class Grammar implements IteratorAggregate,ArrayAccess {
 			return null;
 	}
 
+
+
+
+	private $lr1_parsing_graph;
+	private function InitLR1Parsing(){
+		$a = array();
+		foreach ($this->starting_non_terminal as $rule)
+			$a[] = new SRItem($this->starting_non_terminal,$rule);
+
+		$state = new SRState( $a );
+
+		var_dump($state->GetKey());
+	}
+
+
+
+
+
+
+
+	public function DebugReport(){
+		$this->DebugProductions();
+		$this->DebugFirstSets();
+		$this->DebugFollowSets();
+		$this->DebugLL1ParsingTable();
+	}
 }
 
