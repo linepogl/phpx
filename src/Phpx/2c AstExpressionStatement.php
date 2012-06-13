@@ -5,17 +5,15 @@ class AstExpressionStatement extends AstStatement {
 	/** @var AstExpression */
 	private $expression = null;
 
-	public static function Make(ParseTree $parse_tree) {
-		$r = new self();
-		$r->expression = AstExpression::Make($parse_tree->GetChild(0));
-		$r->source_pos = $r->expression->GetSourcePos();
-		return $r;
+	public function __construct( AstExpression $expression ){
+		parent::__construct( $expression->GetSourcePos() );
+		$this->expression = $expression;
 	}
 
-	public function DebugReport($level = 0) {
-		parent::DebugReport($level);
+	public function Debug($level = 0) {
+		parent::Debug($level);
 		if (!is_null($this->expression))
-			$this->expression->DebugReport($level+1);
+			$this->expression->Debug($level+1);
 	}
 
 	public function CalculateType(Scope $scope, Validator $v) {

@@ -9,7 +9,7 @@ class Validator implements ArrayAccess, IteratorAggregate, Countable {
 	public function offsetUnset($offset) { unset($this->exceptions[$offset]); }
 	public function offsetSet($offset, $value) {
 		if (is_null($offset)){
-			if ($value instanceof CompileTimeException)
+			if ($value instanceof Exception)
 				$this->exceptions[] = $value ;
 			else
 				throw new InvalidArgumentException('Cannot insert anything but exceptions to a Validator.');
@@ -17,10 +17,10 @@ class Validator implements ArrayAccess, IteratorAggregate, Countable {
 		else
 			throw new InvalidArgumentException('Cannot modify existing exceptions of a Validator.');
 	}
-	public function RenderText(){
-		/** @var $ex CompileTimeException */
+	public function Debug(){
+		/** @var $ex Exception */
 		foreach ($this->exceptions as $ex) {
-			echo "\n".'* '. $ex->GetMessage();
+			echo '* '. $ex->GetMessage()."\n";
 		}
 	}
 }

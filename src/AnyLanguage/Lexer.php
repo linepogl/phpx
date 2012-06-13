@@ -2,47 +2,28 @@
 
 
 class Lexer {
+	private $grammar;
 	private $reader;
-	private $buffer = array();
-	private $index = 0;
-	private $bookmark = null;
-	public function __construct(Reader $reader){
+	private $token = null;
+	public function __construct(Grammar $grammar, Reader $reader){
+		$this->grammar = $grammar;
 		$this->reader = $reader;
-		$this->buffer[] = $this->Scan();
+		$this->token = $this->Scan();
 	}
 
 	/** @return Token */
-	public function GetToken(){ return $this->buffer[$this->index]; }
-	public function Is( $terminal ){ return $this->GetToken()->Is( $terminal ); }
-	public function SkipComments(){ while($this->GetToken()->Is(TComment)) $this->Consume(); }
+	public function GetToken(){ return $this->token; }
+	public function Is( $terminal ){ return $this->token->Is( $terminal ); }
+	public function SkipComments(){ while($this->token->Is(TComment)) $this->token = $this->Scan(); }
 
 
 	/** @return Token */
 	public function Consume(){
-		$this->ExpectX(func_get_args());
-		$r = $this->GetToken();
-		$this->index++;
-		while ($this->index >= count($this->buffer))
-			$this->buffer[] = $this->Scan();
+		$r = $this->token;
+		$this->token = $this->Scan();
 		return $r;
 	}
-	public function Sniff(){ if (is_null($this->bookmark)) $this->bookmark = $this->index; }
-	public function SniffNext(){ $this->Sniff(); $this->Consume(); }
-	public function StopSniffing(){ if (is_null($this->bookmark)) return; $this->index = $this->bookmark; $this->bookmark = null; }
 
-	public function Match(){
-		$a = func_get_args();
-		if (!in_array(TComment,$a)) $this->SkipComments();
-		foreach ($a as $terminal) if ($this->Is($terminal)) return true;
-		return false;
-	}
-	public function Expect(){ $this->ExpectX(func_get_args()); }
-	private function ExpectX($a){
-		if (empty($a)) return;
-		if (!in_array(TComment,$a)) $this->SkipComments();
-		foreach ($a as $terminal) if ($this->Is( $terminal )) return;
-		throw new CompileTimeException( 'Unexpected token ' . $this->GetToken()->GetTerminal() . ' while waiting for ' . implode($a,' or ') . '.' , $this->GetToken()->GetSourcePos() );
-	}
 
 
 
@@ -59,7 +40,7 @@ class Lexer {
 		// End of file
 		//
 		if ($this->reader->IsEndOfFile()){
-			return new Token(TEndOfFile,'',$src,$src);
+			return new Token($this->grammar[TEndOfFile],'',$src,$src);
 		}
 
 
@@ -70,11 +51,12 @@ class Lexer {
 			$s = $this->reader->Consume();
 			while ($this->reader->IsAlpha() || $this->reader->IsDigit())
 				$s .= $this->reader->Consume();
-			switch ($s){
-				case 'var': return new Token(TVar,$s,$src,$this->reader->GetSourcePos());
-				case 'int': return new Token(TInt,$s,$src,$this->reader->GetSourcePos());
+			$map = $this->grammar->GetFixedLexemeMap();
+			if (array_key_exists($s,$map)){
+				$terminal = $map[$s];
+				return new Token($terminal,$s,$src,$this->reader->GetSourcePos());
 			}
-			return new Token(TIdentifier,$s,$src,$this->reader->GetSourcePos());
+			return new Token($this->grammar[TIdentifier],$s,$src,$this->reader->GetSourcePos());
 		}
 
 
@@ -87,15 +69,15 @@ class Lexer {
 			if ($this->reader->Is('x')) {
 				$s .= $this->reader->Consume();
 				if (!$this->reader->IsHexDigit())
-					return new Token(TUnknown,$s,$src,$this->reader->GetSourcePos());
+					return new Token($this->grammar[TUnknown],$s,$src,$this->reader->GetSourcePos());
 				while ($this->reader->IsHexDigit())
 					$s .= $this->reader->Consume();
-				return new Token(TIntLiteral,$s,$src,$this->reader->GetSourcePos());
+				return new Token($this->grammar[TIntLiteral],$s,$src,$this->reader->GetSourcePos());
 			}
 			else {
 				while($this->reader->IsDigit())
 					$s .= $this->reader->Consume();
-				return new Token(TIntLiteral,$s,$src,$this->reader->GetSourcePos());
+				return new Token($this->grammar[TIntLiteral],$s,$src,$this->reader->GetSourcePos());
 			}
 		}
 
@@ -109,7 +91,7 @@ class Lexer {
 			if ($this->reader->Is('/')) {
 				while(!$this->reader->IsEndOfLine())
 					$s .= $this->reader->Consume();
-				return new Token(TComment,$s,$src,$this->reader->GetSourcePos());
+				return new Token($this->grammar[TComment],$s,$src,$this->reader->GetSourcePos());
 			}
 			elseif ($this->reader->Is('*')) {
 				$s .= $this->reader->Consume();
@@ -122,10 +104,10 @@ class Lexer {
 					$s .= $this->reader->Consume();
 					if ($level < 0) break;
 				}
-				return new Token(TComment,$s,$src,$this->reader->GetSourcePos());
+				return new Token($this->grammar[TComment],$s,$src,$this->reader->GetSourcePos());
 			}
 			else {
-				return new Token(TUnknownSymbol,$s,$src,$this->reader->GetSourcePos());
+				return new Token($this->grammar[TUnknown],$s,$src,$this->reader->GetSourcePos());
 			}
 		}
 
@@ -133,29 +115,29 @@ class Lexer {
 
 		elseif ($this->reader->Is('=')) {
 			$s = $this->reader->Consume();
-			return new Token(TAssign,$s,$src,$this->reader->GetSourcePos());
+			return new Token($this->grammar[TAssign],$s,$src,$this->reader->GetSourcePos());
 		}
 		elseif ($this->reader->Is(';')) {
 			$s = $this->reader->Consume();
-			return new Token(TSemicolon,$s,$src,$this->reader->GetSourcePos());
+			return new Token($this->grammar[TSemicolon],$s,$src,$this->reader->GetSourcePos());
 		}
 		elseif ($this->reader->Is('.')) {
 			$s = $this->reader->Consume();
-			return new Token(TDot,$s,$src,$this->reader->GetSourcePos());
+			return new Token($this->grammar[TDot],$s,$src,$this->reader->GetSourcePos());
 		}
 		elseif ($this->reader->Is('{')) {
 			$s = $this->reader->Consume();
-			return new Token(TCurlyOpen,$s,$src,$this->reader->GetSourcePos());
+			return new Token($this->grammar[TCurlyOpen],$s,$src,$this->reader->GetSourcePos());
 		}
 		elseif ($this->reader->Is('}')) {
 			$s = $this->reader->Consume();
-			return new Token(TCurlyClose,$s,$src,$this->reader->GetSourcePos());
+			return new Token($this->grammar[TCurlyClose],$s,$src,$this->reader->GetSourcePos());
 		}
 
 
 		else {
 			$s = $this->reader->Consume();
-			return new Token(TUnknownSymbol,$s,$src,$this->reader->GetSourcePos());
+			return new Token($this->grammar[TUnknown],$s,$src,$this->reader->GetSourcePos());
 		}
 
 	}

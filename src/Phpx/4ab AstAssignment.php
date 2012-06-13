@@ -8,18 +8,16 @@ class AstAssignment extends AstExpression {
 	/** @var AstExpression */
 	private $expression;
 
-	public static function Make(ParseTree $parse_tree) {
-		$r = new self();
-		$r->variable = AstVariable::Make($parse_tree->GetChild(0)->GetChild(0));
-		$r->source_pos = $r->variable->GetSourcePos();
-		$r->expression = AstExpression::Make($parse_tree->GetChild(1)->GetChild(1));
-		return $r;
+	public function __construct( AstVariable $variable , AstExpression $expression ) {
+		parent::__construct($variable->GetSourcePos());
+		$this->variable = $variable;
+		$this->expression = $expression;
 	}
 
-	public function DebugReport($level = 0) {
-		parent::DebugReport($level);
-		$this->variable->DebugReport($level + 1);
-		$this->expression->DebugReport($level + 1);
+	public function Debug($level = 0) {
+		parent::Debug($level);
+		$this->variable->Debug($level + 1);
+		$this->expression->Debug($level + 1);
 	}
 
 

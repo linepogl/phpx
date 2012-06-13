@@ -4,44 +4,26 @@ class AstVariableDeclarationStatement extends AstStatement {
 
 	private $name;
 
-
 	/** @var AstType */
 	private $type = null;
 
 	/** @var AstExpression */
 	private $initial_expression = null;
 
-	public static function Make(ParseTree $parse_tree) {
-		$r = new self;
-
-		$r->source_pos = $parse_tree->GetChild(0)->GetToken()->GetSourcePos();
-
-		/** @var $name_node ParseTree */
-		$r->name = $parse_tree->GetChild(1)->GetToken()->GetLexeme();
-
-		/** @var $node ParseTree */
-		foreach ($parse_tree->GetChild(2)->GetChildren() as $node){
-			if ($node->GetItem() == NType) {
-				$r->type = AstType::Make( $node );
-			}
-			elseif ($node->GetItem() == NAssign) {
-				if ($node->HasChildren()) {
-					$r->initial_expression = AstExpression::Make( $node->GetChild(1) );
-				}
-			}
-		}
-
-		return $r;
+	public function __construct( Token $name_token , AstType $type = null, AstExpression $expr = null ) {
+		$this->name = $name_token->GetLexeme();
+		$this->type = $type;
+		$this->initial_expression = $expr;
 	}
 
 
-	public function DebugReport($level = 0) {
+	public function Debug($level = 0) {
 		$tabs = str_repeat('  ',$level);
 		echo $tabs . get_called_class() . ' ' . $this->name . ' ['.$this->compile_time_type. '] ' . $this->source_pos . "\n";
 		if (!is_null($this->type))
-			$this->type->DebugReport($level + 1);
+			$this->type->Debug($level + 1);
 		if (!is_null($this->initial_expression))
-			$this->initial_expression->DebugReport($level + 1);
+			$this->initial_expression->Debug($level + 1);
 	}
 
 	public function CalculateType(Scope $scope, Validator $v) {

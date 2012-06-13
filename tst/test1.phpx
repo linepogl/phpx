@@ -1,5 +1,4 @@
-
-var x int;
+}*	var x int;{.=.}
 {x = 3;var z phantom;}
 var y /* inner /* ! */ comment */ a;
 var fw = 0xA4;
@@ -10,5 +9,9 @@ var z int = x; // line comment /* !
 var q A.B.C ;
 var qq = q = q;
 x;
-fw;
+fw;;
+fw.xxx.efe;
 4;
+
+
+}

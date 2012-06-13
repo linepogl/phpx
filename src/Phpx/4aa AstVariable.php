@@ -1,6 +1,6 @@
 <?php
 
-class AstComplexType extends AstType {
+class AstVariable extends AstExpression {
 
 	private $namespaces = array();
 	private $name;
@@ -13,17 +13,23 @@ class AstComplexType extends AstType {
 		$this->name = array_pop($this->namespaces);
 	}
 
-	public function DebugReport($level = 0){
+	public function Debug($level = 0){
 		$tabs = str_repeat('  ',$level);
 		echo $tabs . get_called_class() . ': ';
 		foreach ($this->namespaces as $ns)
 			echo $ns.'.';
-		echo $this->name . ' ['.$this->compile_time_type. '] ' . $this->source_pos . "\n";
+		echo $this->name . ' ['.$this->compile_time_type. ']' . "\n";
 	}
 
-	public function CalculateType(Scope $scope, Validator $v){
-		$this->compile_time_type = implode('.',$this->namespaces).'.'.$this->name;
+	public function CalculateType(Scope $scope, Validator $v) {
+		$type = $scope->GetType($this->name);
+
+		if (is_null($type)) {
+			$v[] = new CompileTimeException('Undefined variable:'.$this->name,$this->GetSourcePos());
+			return null;
+		}
+
+		$this->compile_time_type = $type;
 		return $this->compile_time_type;
 	}
-
 }

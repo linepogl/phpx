@@ -19,27 +19,23 @@ echo '<pre>';
 
 
 $grammar = new PhpxGrammar();
-$grammar->DebugReport();
-die;
-
 $parser = new Parser($grammar);
 
 foreach (scandir('tst') as $f) {
 	$ff = "tst/$f";
 	if (!is_file($ff)) continue;
-	$reader = new Reader($ff);
-	$lexer = new Lexer($reader);
-	$parser->Add($lexer);
+	$parser->AddFile($ff);
 }
 
-$parse_tree = $parser->Parse();
-$parse_tree->DebugReport();
+$v = new Validator();
+$ast = $parser->Parse( $v );
+$ast->Debug();
+$v->Debug();
+die;
+
 
 $v = new Validator();
-$ast = AstProgram::Make($parse_tree);
 $ast->CalculateType(new Scope(),$v);
-
-$ast->DebugReport();
-
-$v->RenderText();
+$ast->Debug();
+$v->Debug();
 
