@@ -19,23 +19,32 @@ echo '<pre>';
 
 
 $grammar = new PhpxGrammar();
-$parser = new Parser($grammar);
 
 foreach (scandir('tst') as $f) {
-	$ff = "tst/$f";
-	if (!is_file($ff)) continue;
-	$parser->AddFile($ff);
+	if ($f == '.' || $f == '..') continue;
+	if (!is_dir("tst/$f")) continue;
+
+
+	echo "<h1>PROJECT: $f</h1>";
+
+	$parser = new Parser($grammar);
+	foreach (scandir("tst/$f") as $ff) {
+		if (!is_file("tst/$f/$ff")) continue;
+		$parser->AddFile("tst/$f/$ff");
+	}
+
+	$v = new Validator();
+	$ast = $parser->Parse( $v );
+	$ast->Debug();
+	$v->Debug();
+
+//	$ast->CalculateType(new Scope(),$v);
+//	$ast->Debug();
+//	$v->Debug();
+
 }
 
-$v = new Validator();
-$ast = $parser->Parse( $v );
-$ast->Debug();
-$v->Debug();
 die;
 
 
-$v = new Validator();
-$ast->CalculateType(new Scope(),$v);
-$ast->Debug();
-$v->Debug();
 

@@ -6,10 +6,8 @@ abstract class AstNode {
 	protected $source_pos;
 	protected $compile_time_type = 'undefined';
 
-	public static function Make( ParseNode $node ){ throw new Exception(); }
-	public function __construct( SourcePos $source_pos , $compile_time_type ) {
+	public function __construct( SourcePos $source_pos ) {
 		$this->source_pos = $source_pos;
-		$this->compile_time_type = $compile_time_type;
 	}
 
 	public function __toString(){ return get_called_class(); }
@@ -29,5 +27,6 @@ abstract class AstNode {
 	public function GetCompileTimeType(){
 		return $this->compile_time_type;
 	}
+	public abstract function CalculateType(Scope $scope, Validator $v);
 
 }

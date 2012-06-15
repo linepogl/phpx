@@ -5,6 +5,7 @@ const TVar = 'TVar';
 const TDot = 'TDot';
 const TInt = 'TInt';
 const TAssign = 'TAssign';
+const TEquals = 'TEquals';
 const TCurlyOpen = 'TCurlyOpen';
 const TCurlyClose = 'TCurlyClose';
 const TSemicolon = 'TSemicolon';
@@ -33,6 +34,7 @@ class PhpxGrammar extends Grammar {
 		$this[TDot] = Terminal('.');
 		$this[TInt] = Terminal('int');
 		$this[TAssign] = Terminal('=');
+		$this[TEquals] = Terminal('==');
 		$this[TCurlyOpen] = Terminal('{');
 		$this[TCurlyClose] = Terminal('}');
 		$this[TSemicolon] = Terminal(';');

@@ -174,27 +174,48 @@ abstract class Grammar implements IteratorAggregate,ArrayAccess,Countable {
 	//
 	//
 	/** @var array */
-	private $fixed_lexeme_map;
+	private $keyword_map = array();
+	private $punctuation_map = array();
 	/** @return array */
-	public function GetFixedLexemeMap(){
-		return $this->fixed_lexeme_map;
+	public function GetKeywordMap(){
+		return $this->keyword_map;
 	}
+	/** @return array */
+	public function GetPunctuationMap(){
+		return $this->punctuation_map;
+	}
+	private function IsAlpha($char){ $x = ord($char); return ($x>96&&$x<123)||($x>64&&$x<91)||$char=='_'; }
 	public function InitFixedLexemeMap(){
-		$this->fixed_lexeme_map = array();
 		/** @var $terminal Terminal */
 		foreach ($this->terminals as $terminal){
 			$fixed_lexeme = $terminal->GetFixedLexeme();
 			if (empty($fixed_lexeme)) continue;
-			$this->fixed_lexeme_map[$fixed_lexeme] = $terminal;
+
+			if ($this->IsAlpha(substr($fixed_lexeme,0,1)))
+				$this->keyword_map[$fixed_lexeme] = $terminal;
+			else {
+				$l = strlen($fixed_lexeme);
+				for ($i = 1; $i <= $l; $i++) {
+					$prefix = substr($fixed_lexeme,0,$i);
+					if (!array_key_exists( $prefix , $this->punctuation_map ))
+						$this->punctuation_map[$prefix] = $this[TUnknown];
+				}
+				$this->punctuation_map[$fixed_lexeme] = $terminal;
+			}
 		}
+		ksort($this->keyword_map);
+		ksort($this->punctuation_map);
 	}
 	private function DebugFixesLexemes(){
 		echo "FIXED LEXEMES\n-------------\n";
-		/** @var $non_terminal NonTerminal */
-		foreach ($this->fixed_lexeme_map as $lexeme => $non_terminal)
-			echo $lexeme.' -> '.$non_terminal. "\n";
+		/** @var $terminal Terminal */
+		foreach ($this->keyword_map as $lexeme => $terminal)
+			echo $lexeme.' -> '.$terminal. "\n";
+		foreach ($this->punctuation_map as $lexeme => $terminal)
+			echo $lexeme.' -> '.$terminal."\n";
 		echo "\n";
 	}
+
 
 
 
