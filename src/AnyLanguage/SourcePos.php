@@ -19,19 +19,20 @@ class SourcePos {
 	public function GetLineTo(){ return $this->line; }
 	public function GetColTo(){ return $this->col; }
 
-	public function __toString(){ return $this->ToDebugString(); }
-	public function ToDebugString(){ return '@'.$this->filename.'['.$this->line.':'.$this->col.']'; }
-
+	public function __toString(){ return $this->AsString(); }
+	public function AsString(){
+		if ($this->line_to == $this->line && $this->col_to == $this->col)
+			return '@'.$this->filename.'['.$this->line.':'.$this->col.']';
+		elseif ($this->line_to == $this->line && $this->col_to - $this->col == 1)
+			return '@'.$this->filename.'['.$this->line.':'.$this->col.']';
+		else
+			return '@'.$this->filename.'['.$this->line.':'.$this->col.' - '.$this->line_to.':'.$this->col_to.']';
+	}
 
 	public function UpTo( SourcePos $pos ){
-		if ($pos->filename != $this->filename)
-			throw new Exception();
-		return new SourcePos(
-			$this->filename,
-			$this->line,
-			$this->col,
-			$pos->GetLineTo(),
-			$pos->GetColTo()
-			);
+		return $pos->filename != $this->filename
+			? null
+			: new SourcePos($this->filename,$this->line,$this->col,$pos->GetLineTo(),$pos->GetColTo())
+			;
 	}
 }

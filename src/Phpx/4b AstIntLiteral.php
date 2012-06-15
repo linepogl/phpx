@@ -5,7 +5,6 @@ class AstIntLiteral extends AstExpression {
 	private $value;
 
 	public function __construct( Token $x ){
-		parent::__construct( $x->GetSourcePos() );
 		$lexeme = $x->GetLexeme();
 
 		if (substr($lexeme,0,2) == '0x')
@@ -17,16 +16,16 @@ class AstIntLiteral extends AstExpression {
 		else
 			$this->value = intval( $lexeme , 10 );
 
+	}
+
+	public function AsString(){
+		return parent::AsString() . ' ' . $this->value;
+	}
+
+
+
+	protected function OnAnalyze(Scope $scope, Validator $v){
 		$this->compile_time_type = 'int';
-	}
-
-	public function Debug($level = 0){
-		$tabs = str_repeat('  ',$level);
-		echo $tabs . get_called_class() . ' ' . $this->value . ' ['.$this->compile_time_type. ']' . "\n";
-	}
-
-	public function CalculateType(Scope $scope, Validator $v){
-		return $this->compile_time_type;
 	}
 
 

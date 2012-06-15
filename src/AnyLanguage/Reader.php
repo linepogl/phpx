@@ -5,7 +5,7 @@ class Reader {
 	private $char = null;
 	private $filename = null;
 	private $line = 1;
-	private $col = 0;
+	private $col = 1;
 	private $consumed = true;
 	private $curry_new_line = false;
 	public function __construct($filename){
@@ -22,7 +22,7 @@ class Reader {
 		elseif ($c == "\r") { $c = "\n"; $this->curry_new_line = true; }
 		elseif ($c == "\n" && $this->curry_new_line) { $this->curry_new_line = false; $this->Scan(); return; }
 		else $this->curry_new_line = false;
-		if ($this->char == "\n") { $this->line++; $this->col = 0; }
+		if ($this->char == "\n") { $this->line++; $this->col = 1; }
 		$this->char = $c;
 		$this->col++;
 		$this->consumed = false;

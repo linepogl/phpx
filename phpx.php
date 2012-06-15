@@ -35,16 +35,9 @@ foreach (scandir('tst') as $f) {
 
 	$v = new Validator();
 	$ast = $parser->Parse( $v );
+	$ast->Analyze(new Scope(),$v);
 	$ast->Debug();
 	$v->Debug();
 
-//	$ast->CalculateType(new Scope(),$v);
-//	$ast->Debug();
-//	$v->Debug();
-
 }
-
-die;
-
-
 

@@ -23,7 +23,7 @@ class Parser {
 	}
 	private function ReadNextToken(Validator $v){
 		if ($this->current_lexer_index >= count($this->lexers)) {
-			$this->token = new Token($this->grammar[TEndOfInput],'',new SourcePos());
+			$this->token = new Token($this->grammar[TEndOfInput],'',null);
 		}
 		else {
 			$this->lexers[$this->current_lexer_index]->SkipComments();
@@ -132,11 +132,16 @@ class Parser {
 			}
 		}
 
+		$src = $node->UpdateSourcePosFromChildren();
+
+
 
 		/** @var $reduction callable */
 		$reduction = $this->grammar->GetReduction( $non_terminal , $rule );
 		if (!is_null($reduction)) {
+			$src = $node->GetSourcePos();
 			$node = $reduction( $node );
+			$node->InitSourcePos( $src );
 		}
 
 		return $node;

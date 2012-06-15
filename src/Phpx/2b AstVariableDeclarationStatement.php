@@ -16,19 +16,19 @@ class AstVariableDeclarationStatement extends AstStatement {
 		$this->initial_expression = $expr;
 	}
 
-
-	public function Debug($level = 0) {
-		$tabs = str_repeat('  ',$level);
-		echo $tabs . get_called_class() . ' ' . $this->name . ' ['.$this->compile_time_type. '] ' . $this->source_pos . "\n";
-		if (!is_null($this->type))
-			$this->type->Debug($level + 1);
-		if (!is_null($this->initial_expression))
-			$this->initial_expression->Debug($level + 1);
+	public function AsString(){ return parent::AsString() .' '.$this->name; }
+	public function GetChildren(){
+		$r = array();
+		if (!is_null($this->type)) $r[] = $this->type;
+		if (!is_null($this->initial_expression)) $r[] = $this->initial_expression;
+		return $r;
 	}
 
-	public function CalculateType(Scope $scope, Validator $v) {
-		$type1 = is_null($this->type) ? null : $this->type->CalculateType($scope,$v);
-		$type2 = is_null($this->initial_expression) ? null : $this->initial_expression->CalculateType($scope,$v);
+
+
+	protected function OnAnalyze(Scope $scope, Validator $v) {
+		$type1 = is_null($this->type) ? null : $this->type->GetCompileTimeType();
+		$type2 = is_null($this->initial_expression) ? null : $this->initial_expression->GetCompileTimeType();
 
 		if (!is_null($type1)) {
 			if (!is_null($type2)) {
@@ -43,7 +43,6 @@ class AstVariableDeclarationStatement extends AstStatement {
 			$scope->SetType($this->name,$type2);
 		}
 
-		$this->compile_time_type = 'void';
-		return $this->compile_time_type;
+		$this->compile_time_type = self::VOID;
 	}
 }

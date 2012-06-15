@@ -9,30 +9,29 @@ class AstAssignment extends AstExpression {
 	private $expression;
 
 	public function __construct( AstVariable $variable , AstExpression $expression ) {
-		parent::__construct($variable->GetSourcePos());
 		$this->variable = $variable;
 		$this->expression = $expression;
 	}
 
-	public function Debug($level = 0) {
-		parent::Debug($level);
-		$this->variable->Debug($level + 1);
-		$this->expression->Debug($level + 1);
+	public function GetChildren(){
+		return array($this->variable,$this->expression);
 	}
 
 
-	public function CalculateType(Scope $scope, Validator $v){
-		$type1 = $this->variable->CalculateType($scope,$v);
-		$type2 = $this->expression->CalculateType($scope,$v);
+
+
+	protected function OnAnalyze(Scope $scope, Validator $v){
+		$type1 = $this->variable->GetCompileTimeType();
+		$type2 = $this->expression->GetCompileTimeType();
 
 
 		if (!is_null($type1) && !is_null($type2) && $type1 != $type2) {
 			$v[] = new CompileTimeException('Type error: ' . $type1 . ' != ' . $type2 .'.',$this->GetSourcePos());
-			return null;
+			$this->compile_time_type = self::UNDEFINED;
 		}
-
-		$this->compile_time_type = $type1;
-		return $this->compile_time_type;
+		else {
+			$this->compile_time_type = $type1;
+		}
 	}
 
 }

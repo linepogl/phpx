@@ -2,11 +2,8 @@
 
 class AstEmptyStatement extends AstStatement {
 
-	public function __construct( ) {
-		$this->compile_time_type = 'void';
+	protected function OnAnalyze(Scope $scope, Validator $v) {
+		$this->compile_time_type = self::VOID;
 	}
 
-	public function CalculateType(Scope $scope, Validator $v) {
-		return $this->compile_time_type;
-	}
 }

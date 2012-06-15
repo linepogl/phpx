@@ -13,23 +13,29 @@ class AstVariable extends AstExpression {
 		$this->name = array_pop($this->namespaces);
 	}
 
-	public function Debug($level = 0){
-		$tabs = str_repeat('  ',$level);
-		echo $tabs . get_called_class() . ': ';
-		foreach ($this->namespaces as $ns)
-			echo $ns.'.';
-		echo $this->name . ' ['.$this->compile_time_type. ']' . "\n";
+	public function AsString(){
+		return parent::AsString() . ' ' . $this->GetFullName();
 	}
 
-	public function CalculateType(Scope $scope, Validator $v) {
+	public function GetFullName(){
+		$r = '';
+		foreach ($this->namespaces as $ns)
+			$r .= $ns.'.';
+		$r .= $this->name;
+		return $r;
+	}
+
+
+
+	protected function OnAnalyze(Scope $scope, Validator $v) {
 		$type = $scope->GetType($this->name);
 
 		if (is_null($type)) {
 			$v[] = new CompileTimeException('Undefined variable:'.$this->name,$this->GetSourcePos());
-			return null;
+			$this->compile_time_type = self::UNDEFINED;
 		}
-
-		$this->compile_time_type = $type;
-		return $this->compile_time_type;
+		else {
+			$this->compile_time_type = $type;
+		}
 	}
 }
