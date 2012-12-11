@@ -1,0 +1,185 @@
+
+struct Null {
+
+
+
+	public Null Make(Null x) {}
+
+	public Null Construct(Null x) {}
+}
+
+struct ID {
+	private int value;
+
+	public ID Copy(ID x) {}  <-- The only one permitted
+	public ID Make(ID x) {}  <-- ?
+
+	public static ID From(ID x) {}         <-- Not permitted
+	public static ID From(GenericID x) {}  <-- Not permitted
+	public static ID From(XItem x) {}      <-- Permitted
+	public static ID From(int x) {}        <-- Permitted
+	public static ID From(int? x) {}       <-- ? Not permitted or not advised?
+
+}
+
+
+
+
+struct int {
+	private int value;
+}
+
+
+static Test? Test.Pick(ID id) { }
+
+Test.Pick((ID)3);
+
+int --> ID? X
+int --> ID  ok
+
+Test.Pick(3 as ID)
+Test.Pick( 3.ID() )
+
+
+explicit ID? -> Test? { return Test.Pick(this); }
+implicit ID? -> Test? { return Test.Pick(this); }
+
+
+explicit ID? -> XItem:T? () { return T.Pick(this); }
+explicit HttpValue -> XItem:T? { return A.Pick(this); }
+
+Http.Post('idTest').Test();
+Http.Post('idTest').ID();
+
+
+
+
+
+int ID.CompareTo( variant:T x ) {
+
+}
+
+
+
+ID? x;
+
+x.ID().... !!!!!!!!!!!! NO!
+
+x.AsID().
+
+x.ID().
+x->int().sub(3).add(9)
+
+
+3
+Test.Pick( 3.ID() );
+
+
+Test.Pick( Http.Post('idTest') )          implicit HttpValue --> ID NO!      ok
+
+
+implicit HttpValue --> ID? {
+	try {
+		return this.value.Trim().ParseHex().ID();
+	}
+	catch (Exception ex){
+		return null;
+	}
+}
+
+
+
+
+
+
+return x
+	| ID x => ...
+	| Null => 3
+
+
+	ID x => , _ => )
+
+
+
+
+explicit ID(int x);
+
+
+explicit ID(int x) { }
+explicit ID(int x , int y) { }
+explicit ID(ID x) {} ?????????
+
+
+
+
+
+function ID.ExplicitCastFrom(int x) {}
+
+
+
+
+x = ID(3);
+
+ID operator --> ID (int x)
+
+int operator <=>(Null x, Null y) { <internal> }
+
+int Null.CompareTo(Null x) { <internal> }
+
+int int.CompareTo(int x) { <internal> }
+int Null.CompareTo(int x) { <internal> }
+int int.CompareTo(Null x) { <internal> }
+
+int float.CompareTo(float x) { <internal> }
+int float.CompareTo(Null x) { <internal> }
+int Null.CompareTo(float x) { <internal> }
+int float.CompareTo(int x) { <internal> }
+int int.CompareTo(float x) { <internal> }
+
+int ID.CompareTo(ID x) { return this.value - x.value; }
+int ID.CompareTo(Null x) { return 1; }
+int Null.CompareTo(ID x) { return -1; }
+int ID.CompareTo(int x) { return this.value - x; }
+int int.CompareTo(ID x) { return this - x.value; }
+int ID.CompareTo(float x) { return this.value - x; }
+int float.CompareTo(ID x) { return this - x.value; }
+
+int GenericID.CompareTo(GenericID x) { int r = this.GetClass().CompareTo(x.GetClass()); return r == 0 ? this.value - x.value : r; }
+
+
+
+int? x = null;
+x = 3;
+return x == null;     <-- late binding...
+
+
+return (is_null(x) ? phpx_Null_IsEqualTo_Null(x,null) : phpx_int_IsEqualTo_Null(x,null));
+// opt:
+return (is_null(x) ? true : false);
+// opt:
+return is_null(x);
+
+
+
+ID? x = new ID(3);
+int? y = 9;
+
+return x == y;
+
+
+return (is_null(x) ? (is_null(y) ? \phpx\IsEqualTo__Null__Null(x,y) : \phpx\IsEqualTo__Null__Int(x,y)) : (is_null(y) ? \phpx\IsEqualTo__ID__Null(x,y) : \phpx\IsEqualTo__ID__Int(x,y)));
+// opt:
+return (is_null(x) ? (is_null(y) ? true : false) : (is_null(y) ? \phpx\ID_IsEqualTo_Null(x,y) : \phpx\ID_IsEqualTo_Int(x,y)));
+// opt:
+return (is_null(x) ? is_null(y) : (is_null(y) ? \phpx\ID_IsEqualTo_Null(x,y) : \phpx\ID_IsEqualTo_Int(x,y)));
+
+
+
+
+GenericID? x = new GenericID('Test',3);
+ID y = new ID(4);
+
+return x == y;
+
+return (is_null(x) ? \phpx\IsEqualTo__Null__ID(x,y) : \phpx\IsEqualTo__ID__ID(x,y));
+

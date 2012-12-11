@@ -1,0 +1,125 @@
+
+/*
+
+function >=< ( x int , y int ) int   { return x - y; }
+function >=< ( x int? , y int ) int  { return x is null ? -1 : x - y; }
+function >=< ( x int? , y int? ) int { return x is null ? (y is null ? 0 : -1) : (y is null ? 1 : x - y); }
+
+function >=< ( x float , y float ) int   { return x - y; }
+function >=< ( x float? , y float ) int  { return x is null ? -1 : x - y; }
+function >=< ( x float? , y float? ) int { return x is null ? (y is null ? 0 : -1) : (y is null ? 1 : x - y); }
+
+function ( x int ) float { return floatval(x); }
+
+function == ( x null , y null ) bool { true }
+function == ( x int , y int ) bool { (internal) }
+
+
+
+
+public class XItem {
+
+	meta string? DbTableName = null;
+	meta bool IsDbBound = true;
+
+	meta string? XmlTagName = null;
+	meta bool IsXmlBound = true;
+
+	meta XOrderBy? OrderBy = null;
+	meta XItem# Parent = null;
+
+
+	public ID id;
+
+	meta field {
+		public meta
+	}
+
+	meta slave {
+
+	}
+
+	meta group {
+
+	}
+}
+
+
+
+
+
+public abstract class XItem {
+
+	public ID id field{ } = later;
+
+	public group Db {
+		public meta string TableName = null;
+		public void Load(){
+
+		}
+		public void Save(){
+
+		}
+		public void Kill(){
+
+		}
+		public static void Seek(){
+
+		}
+	}
+
+
+	meta {
+		public string? DbTableName = null;
+		public OrderBy OrderBy = #id.Asc();
+		public XField* Fields { get { ??? } }
+	}
+
+	meta field {
+		public string? Label = null;
+		public OrderBy Asc(){ return new OrderBy( field , false ); }
+		public OrderBy Desc(){ return new OrderBy( field , true ); }
+	}
+}
+
+
+public class Order : XItem {
+
+	meta {
+		@DbTableName = 'tst_order';
+		@OrderBy = #DateCreated.Desc();
+	}
+
+	#object
+
+	XItem
+	#XItem.Db.Fields
+	#XItem.Fields
+
+	XItem#id
+	XItem.id
+	x.id
+	x#id
+
+
+
+	scope{ static }
+	scope{ instance }
+	scope{ meta }
+	scope{ field meta }
+
+
+	self.DateCreated field { ID?
+	this.DateCreated
+	meta.
+
+
+
+
+
+	public DateTime DateCreated field{ @Label = $Date; get; set; } = DateTime.Now;
+	public field string Comments { @Label = $Date; } = '';
+
+}
+
+
